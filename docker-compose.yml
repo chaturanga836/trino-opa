@@ -16,9 +16,3 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-    networks:
-      - trino-net
-
-networks:
-  trino-net:
-    external: true
