@@ -1,0 +1,24 @@
+services:
+  opa:
+    image: openpolicyagent/opa:0.70.0  # Specified version instead of latest
+    container_name: opa
+    ports:
+      - "6080:8181"
+    command:
+      - "run"
+      - "--server"
+      - "--log-level=debug"
+      - "/policies"
+    volumes:
+      - ./policies:/policies:ro
+    healthcheck:
+      test: ["CMD", "opa", "health"] # Using the internal opa health check command
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - trino-net
+
+networks:
+  trino-net:
+    external: true
