@@ -13,9 +13,9 @@ allow if {
 # 2. Dynamic Tenant Rule: 
 # Access is allowed if the schema name is exactly the same as one of the user's groups
 allow if {
-    # Extract the schema being accessed
-    requested_schema := input.action.resource.schema.name
+    # Extract the schema name from the resource
+    requested_schema := input.action.resource.schema.schemaName
     
-    # Check if that schema name exists in the user's list of groups
-    requested_schema in input.context.groups
+    # FIX: In newer Trino versions, groups are under context.identity.groups
+    requested_schema in input.context.identity.groups
 }
