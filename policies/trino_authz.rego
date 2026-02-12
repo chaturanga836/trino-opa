@@ -40,14 +40,18 @@ allow if {
 
 # 4. Dynamic Tenant Rule (The "Zero-Edit" magic)
 allow if {
-    # We check both the schema resource AND the table resource for the schema name
-    # Trino 479 uses different paths depending on if you are clicking a schema or a table
+    # Define which operations a tenant can do in their schema
+    tenant_operations := ["FilterTables", "SelectFromColumns", "FilterColumns", "ShowColumns"]
+    input.action.operation in tenant_operations
+
+    # Extract schema name from either a Schema resource or a Table resource
     schemas := [
-        input.action.resource.schema.schemaName,
-        input.action.resource.table.schemaName
+        object.get(input.action.resource.schema, "schemaName", "N/A"),
+        object.get(input.action.resource.table, "schemaName", "N/A")
     ]
     requested_schema := schemas[_]
     
+    # Check if the user is in a group that matches the schema name (e.g., group "crypto_lake")
     requested_schema in input.context.identity.groups
 }
 
