@@ -41,7 +41,26 @@ allow if {
 # 4. Dynamic Tenant Rule (The "Zero-Edit" magic)
 allow if {
     # Define which operations a tenant can do in their schema
-    tenant_operations := ["FilterTables", "SelectFromColumns", "FilterColumns", "ShowColumns"]
+    tenant_operations := [
+        # --- Discovery & Metadata ---
+        "FilterTables", 
+        "ShowTables", 
+        "ShowColumns",
+        "FilterColumns",
+        "AccessCatalog",
+        
+        # --- Read Access ---
+        "SelectFromColumns", 
+        
+        # --- Write Access (New) ---
+        "CreateTable",      # Required to run CREATE TABLE
+        "DropTable",        # Required to run DROP TABLE
+        "InsertRow",        # Required for INSERT INTO
+        "DeleteRow",        # Required for DELETE FROM
+        "UpdateRow",        # Required for UPDATE
+        "AddColumn",        # Required for ALTER TABLE ... ADD COLUMN
+        "DropColumn"        # Required for ALTER TABLE ... DROP COLUMN
+    ]
     input.action.operation in tenant_operations
 
     # Extract schema name from either a Schema resource or a Table resource
