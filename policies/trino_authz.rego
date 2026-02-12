@@ -39,8 +39,8 @@ allow if {
 }
 
 # 4. Dynamic Tenant Rule (The "Zero-Edit" magic)
+# 4. Dynamic Tenant Rule (READ/WRITE Access)
 allow if {
-    # Define which operations a tenant can do in their schema
     tenant_operations := [
         # --- Discovery & Metadata ---
         "FilterTables", 
@@ -63,15 +63,16 @@ allow if {
     ]
     input.action.operation in tenant_operations
 
-    # Extract schema name from either a Schema resource or a Table resource
+    # Extract schema name safely
     schemas := [
         object.get(input.action.resource.schema, "schemaName", "N/A"),
         object.get(input.action.resource.table, "schemaName", "N/A")
     ]
     requested_schema := schemas[_]
+    requested_schema != "N/A"
     
-    # Check if the user is in a group that matches the schema name (e.g., group "crypto_lake")
-    requested_schema in input.context.identity.groups
+    # Case-insensitive group matching
+    lower(requested_schema) in [lower(g) | g := input.context.identity.groups[_]]
 }
 
 # 5. System Internal User
